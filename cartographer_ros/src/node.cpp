@@ -330,6 +330,7 @@ void Node::PublishLocalTrajectoryData() {
               trajectory_data.trajectory_options.published_frame;
           stamped_transform.transform = ToGeometryMsgTransform(
               tracking_to_local * (*trajectory_data.published_to_tracking));
+          stamped_transform.transform.translation.z = 0;
           stamped_transforms.push_back(stamped_transform);
 
           tf_broadcaster_->sendTransform(stamped_transforms);
@@ -339,6 +340,7 @@ void Node::PublishLocalTrajectoryData() {
               trajectory_data.trajectory_options.published_frame;
           stamped_transform.transform = ToGeometryMsgTransform(
               tracking_to_map * (*trajectory_data.published_to_tracking));
+          stamped_transform.transform.translation.z = 0;
           tf_broadcaster_->sendTransform(stamped_transform);
         }
       }

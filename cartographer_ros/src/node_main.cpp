@@ -19,6 +19,7 @@
 #include "cartographer_ros/node.h"
 #include "cartographer_ros/node_options.h"
 #include "cartographer_ros/ros_log_sink.h"
+#include "cartographer_ros/msg_conversion.h"
 #include "gflags/gflags.h"
 #include "tf2_ros/transform_listener.h"
 
@@ -47,6 +48,24 @@ DEFINE_string(
 namespace cartographer_ros {
 namespace {
 
+NodeOptions node_options;
+TrajectoryOptions trajectory_options;
+
+void InitPose_Callback(const geometry_msgs::msg::PoseWithCovarianceStamped::ConstPtr msg)
+{
+
+  std::shared_ptr<Cartographer> node;
+  std::tie(node_options, trajectory_options)
+   = LoadOptions(FLAGS_configuration_directory, FLAGS_configuration_basename);
+  node->FinishAllTrajectories();
+  *trajectory_options.trajectory_builder_options.mutable_initial_trajectory_pose()->mutable_relative_pose()
+   = cartographer::transform::ToProto(cartographer_ros::ToRigid3d(msg->pose.pose));
+  if(FLAGS_start_trajectory_with_default_topics)
+  {
+    node->StartTrajectoryWithDefaultTopics(trajectory_options);
+  }
+}
+
 void Run() {
   rclcpp::Node::SharedPtr cartographer_node = rclcpp::Node::make_shared("cartographer_node");
   constexpr double kTfBufferCacheTimeInSeconds = 10.;
@@ -60,8 +79,6 @@ void Run() {
   std::shared_ptr<tf2_ros::TransformListener> tf_listener =
       std::make_shared<tf2_ros::TransformListener>(*tf_buffer);
 
-  NodeOptions node_options;
-  TrajectoryOptions trajectory_options;
   std::tie(node_options, trajectory_options) =
       LoadOptions(FLAGS_configuration_directory, FLAGS_configuration_basename);
 
@@ -77,7 +94,7 @@ void Run() {
   if (FLAGS_start_trajectory_with_default_topics) {
     node->StartTrajectoryWithDefaultTopics(trajectory_options);
   }
-
+  auto InitPose_sub = cartographer_node->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>("/initialpose", 1, InitPose_Callback);
   rclcpp::spin(cartographer_node);
 
   node->FinishAllTrajectories();
