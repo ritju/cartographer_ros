@@ -21,7 +21,7 @@
 #include "cartographer_ros/ros_log_sink.h"
 #include "cartographer_ros/msg_conversion.h"
 #include "gflags/gflags.h"
-#include "tf2_ros/transform_listener.h"
+#include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
 
 DEFINE_bool(collect_metrics, false,
             "Activates the collection of runtime metrics. If activated, the "
@@ -50,11 +50,10 @@ namespace {
 
 NodeOptions node_options;
 TrajectoryOptions trajectory_options;
+std::shared_ptr<Node> node;
 
 void InitPose_Callback(const geometry_msgs::msg::PoseWithCovarianceStamped::ConstPtr msg)
 {
-
-  std::shared_ptr<Cartographer> node;
   std::tie(node_options, trajectory_options)
    = LoadOptions(FLAGS_configuration_directory, FLAGS_configuration_basename);
   node->FinishAllTrajectories();
@@ -84,7 +83,7 @@ void Run() {
 
   auto map_builder =
     cartographer::mapping::CreateMapBuilder(node_options.map_builder_options);
-  auto node = std::make_shared<cartographer_ros::Node>(
+  node = std::make_shared<cartographer_ros::Node>(
     node_options, std::move(map_builder), tf_buffer, cartographer_node,
     FLAGS_collect_metrics);
   if (!FLAGS_load_state_filename.empty()) {
