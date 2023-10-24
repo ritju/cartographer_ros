@@ -49,6 +49,8 @@ find_package(tf2_ros REQUIRED)
 find_package(urdf REQUIRED)
 find_package(urdfdom_headers REQUIRED)
 find_package(visualization_msgs REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+
 
 include_directories(
   include
@@ -99,6 +101,7 @@ set(dependencies
   rosbag2_storage
   urdf
   urdfdom
+  tf2_geometry_msgs
 )
 ament_target_dependencies(${PROJECT_NAME}
   ${dependencies}
