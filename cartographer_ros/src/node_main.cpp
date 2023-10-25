@@ -121,7 +121,7 @@ void LocalizationScore_Callback(const std_msgs::msg::Float32 localization_score_
         score_time = cartographer_node->get_clock()->now();
         update_score_time = false;
       }
-      if ((pose_time - score_time).nanoseconds() > 1e+10)
+      if ((pose_time - score_time).nanoseconds() > 1e+9)
       {
         std::tie(node_options, trajectory_options)
         = LoadOptions(FLAGS_configuration_directory, FLAGS_configuration_basename);
