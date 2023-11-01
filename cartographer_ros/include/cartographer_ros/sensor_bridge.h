@@ -36,6 +36,7 @@
 #include <sensor_msgs/msg/multi_echo_laser_scan.hpp>
 #include <sensor_msgs/msg/nav_sat_fix.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
+#include <std_msgs/msg/float32.hpp>
 
 namespace cartographer_ros {
 
@@ -66,6 +67,7 @@ class SensorBridge {
                         const sensor_msgs::msg::Imu::ConstSharedPtr& msg);
   void HandleLaserScanMessage(const std::string& sensor_id,
                               const sensor_msgs::msg::LaserScan::ConstSharedPtr& msg);
+  void HandleLocalizationScoreMessage(const std::string& sensor_id, const std_msgs::msg::Float32::ConstSharedPtr& msg);
   void HandleMultiEchoLaserScanMessage(
       const std::string& sensor_id,
       const sensor_msgs::msg::MultiEchoLaserScan::ConstSharedPtr& msg);
@@ -92,6 +94,7 @@ class SensorBridge {
       trajectory_builder_;
 
   absl::optional<::cartographer::transform::Rigid3d> ecef_to_local_frame_;
+  float localization_score_;
 };
 
 }  // namespace cartographer_ros

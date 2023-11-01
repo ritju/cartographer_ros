@@ -52,6 +52,7 @@
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
+#include <std_msgs/msg/float32.hpp>
 
 namespace cartographer_ros {
 
@@ -107,6 +108,9 @@ class Node {
                         const sensor_msgs::msg::Imu::ConstSharedPtr &msg);
   void HandleLaserScanMessage(int trajectory_id, const std::string& sensor_id,
                               const sensor_msgs::msg::LaserScan::ConstSharedPtr& msg);
+  
+  void HandleLocalizationScoreMessage(int trajectory_id, const std::string& sensor_id,
+                              const std_msgs::msg::Float32::ConstSharedPtr& msg);
   void HandleMultiEchoLaserScanMessage(
       int trajectory_id, const std::string& sensor_id,
       const sensor_msgs::msg::MultiEchoLaserScan::ConstSharedPtr& msg);
