@@ -163,7 +163,7 @@ void SensorBridge::HandleLaserScanMessage(
 
 void SensorBridge::HandleLocalizationScoreMessage(const std::string& sensor_id, const std_msgs::msg::Float32::ConstSharedPtr& msg){
   localization_score_ = msg->data;
-  LOG(INFO) << "SensorBridge" << localization_score_ ;
+  // LOG(INFO) << "SensorBridge" << localization_score_ ;
 }
 
 void SensorBridge::HandleMultiEchoLaserScanMessage(

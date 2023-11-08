@@ -862,7 +862,7 @@ void Node::HandleLocalizationScoreMessage(int trajectory_id, const std::string& 
   map_builder_bridge_->sensor_bridge(trajectory_id)
       ->HandleLocalizationScoreMessage(sensor_id, msg);
   auto now = rclcpp::Clock();
-  RCLCPP_INFO_STREAM_THROTTLE(node_->get_logger(), now, 1000, "---------in localization---------");
+  // RCLCPP_INFO_STREAM_THROTTLE(node_->get_logger(), now, 1000, "---------in localization---------");
 }
 
 void Node::HandleMultiEchoLaserScanMessage(

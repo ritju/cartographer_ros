@@ -112,9 +112,9 @@ void LocalizationScore_Callback(const std_msgs::msg::Float32 localization_score_
         node->StartTrajectoryWithDefaultTopics(trajectory_options);
       }
       relocalization_state = true;    
-      RCLCPP_INFO_STREAM_THROTTLE(rclcpp::get_logger("cartographer_node"), now, 1000, "In relocating , relocalization_state: " << relocalization_state << "localization_score: " << localization_score_msg.data);
+      // RCLCPP_INFO_STREAM_THROTTLE(rclcpp::get_logger("cartographer_node"), now, 1000, "In relocating , relocalization_state: " << relocalization_state << "localization_score: " << localization_score_msg.data);
     }
-    else if (localization_score_msg.data > 0.8 && relocalization_state && !cmd_vel.angular.z && !cmd_vel.linear.x)
+    else if (localization_score_msg.data > 0.7 && relocalization_state && !cmd_vel.angular.z && !cmd_vel.linear.x)
     {
       if (update_score_time)
       {
@@ -215,9 +215,9 @@ void Run() {
   auto callback_group = cartographer_node->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
   sub_opt.callback_group = callback_group;
   auto InitPose_sub = cartographer_node->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>("/initialpose", 1, InitPose_Callback, sub_opt);
-  auto Localization_sub = cartographer_node->create_subscription<std_msgs::msg::Float32>("/localization_score", 1, LocalizationScore_Callback, sub_opt);
-  auto Pose_sub = cartographer_node->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>("/base_link_pose", 1, PoseCallback, sub_opt);
-  auto Cmd_vel_sub = cartographer_node->create_subscription<geometry_msgs::msg::Twist>("/md_vel", 1, CmdVelCallback, sub_opt);
+  // auto Localization_sub = cartographer_node->create_subscription<std_msgs::msg::Float32>("/localization_score", 1, LocalizationScore_Callback, sub_opt);
+  // auto Pose_sub = cartographer_node->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>("/base_link_pose", 1, PoseCallback, sub_opt);
+  // auto Cmd_vel_sub = cartographer_node->create_subscription<geometry_msgs::msg::Twist>("/md_vel", 1, CmdVelCallback, sub_opt);
   rclcpp::spin(cartographer_node);
 
   node->FinishAllTrajectories();
