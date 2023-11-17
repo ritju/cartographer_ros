@@ -452,6 +452,11 @@ void Node::LaunchSubscribers(const TrajectoryOptions& options,
       {SubscribeWithHandler<std_msgs::msg::Float32>(
             &Node::HandleLocalizationScoreMessage, trajectory_id, kLocalizationScoreTopic, node_, this),
         kLocalizationScoreTopic});
+  
+  subscribers_[trajectory_id].push_back(
+      {SubscribeWithHandler<geometry_msgs::msg::PoseWithCovarianceStamped>(
+            &Node::HandleTransformMessage, trajectory_id, kTransformTopic, node_, this),
+        kTransformTopic});
   for (const std::string& topic : ComputeRepeatedTopicNames(
            kMultiEchoLaserScanTopic, options.num_multi_echo_laser_scans)) {
     subscribers_[trajectory_id].push_back(
@@ -863,6 +868,16 @@ void Node::HandleLocalizationScoreMessage(int trajectory_id, const std::string& 
       ->HandleLocalizationScoreMessage(sensor_id, msg);
   auto now = rclcpp::Clock();
   // RCLCPP_INFO_STREAM_THROTTLE(node_->get_logger(), now, 1000, "---------in localization---------");
+}
+
+void Node::HandleTransformMessage(int trajectory_id, const std::string& sensor_id,
+                              const geometry_msgs::msg::PoseWithCovarianceStamped::ConstSharedPtr& msg){
+  absl::MutexLock lock(&mutex_);
+  if (!sensor_samplers_.at(trajectory_id).rangefinder_sampler.Pulse()) {
+    return;
+  }
+  map_builder_bridge_->sensor_bridge(trajectory_id)
+      ->HandleTransformMessage(sensor_id, msg);
 }
 
 void Node::HandleMultiEchoLaserScanMessage(

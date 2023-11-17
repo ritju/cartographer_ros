@@ -163,7 +163,11 @@ void SensorBridge::HandleLaserScanMessage(
 
 void SensorBridge::HandleLocalizationScoreMessage(const std::string& sensor_id, const std_msgs::msg::Float32::ConstSharedPtr& msg){
   localization_score_ = msg->data;
-  // LOG(INFO) << "SensorBridge" << localization_score_ ;
+}
+
+void SensorBridge::HandleTransformMessage(const std::string& sensor_id, const geometry_msgs::msg::PoseWithCovarianceStamped::ConstSharedPtr& msg){
+  global_pose_x_ = msg->pose.pose.position.x;
+  global_pose_y_ = msg->pose.pose.position.y;
 }
 
 void SensorBridge::HandleMultiEchoLaserScanMessage(
@@ -241,7 +245,7 @@ void SensorBridge::HandleRangefinder(
   const auto sensor_to_tracking =
       tf_bridge_.LookupToTracking(time, CheckNoLeadingSlash(frame_id));
   if (sensor_to_tracking != nullptr) {
-    trajectory_builder_->SetLocalizationScore(localization_score_);
+    trajectory_builder_->SetLocalizationScore(localization_score_, global_pose_x_, global_pose_y_);
     trajectory_builder_->AddSensorData(
         sensor_id, carto::sensor::TimedPointCloudData{
                        time, sensor_to_tracking->translation().cast<float>(),
