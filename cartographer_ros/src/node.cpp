@@ -71,6 +71,19 @@ template <typename MessageType>
           });
 }
 
+template <typename MessageType>
+::rclcpp::SubscriptionBase::SharedPtr SubscribeWithHandlerForOptimizationSign(
+    void (Node::*handler)(int, const std::string&,
+                          const typename MessageType::ConstSharedPtr&),
+    const int trajectory_id, const std::string& topic,
+    ::rclcpp::Node::SharedPtr node_handle, Node* const node) {
+  return node_handle->create_subscription<MessageType>(
+      topic, rclcpp::QoS(rclcpp::KeepLast(1)).transient_local().reliable(),
+      [node, handler, trajectory_id, topic](const typename MessageType::ConstSharedPtr msg) {
+            (node->*handler)(trajectory_id, topic, msg);
+          });
+}
+
 std::string TrajectoryStateToString(const TrajectoryState trajectory_state) {
   switch (trajectory_state) {
     case TrajectoryState::ACTIVE:
@@ -452,6 +465,11 @@ void Node::LaunchSubscribers(const TrajectoryOptions& options,
       {SubscribeWithHandler<std_msgs::msg::Float32>(
             &Node::HandleLocalizationScoreMessage, trajectory_id, kLocalizationScoreTopic, node_, this),
         kLocalizationScoreTopic});
+  
+  subscribers_[trajectory_id].push_back(
+      {SubscribeWithHandlerForOptimizationSign<std_msgs::msg::Bool>(
+            &Node::HandleOptimizationSighMessage, trajectory_id, kOptimizationSignTopic, node_, this),
+        kOptimizationSignTopic});
   
   subscribers_[trajectory_id].push_back(
       {SubscribeWithHandler<geometry_msgs::msg::PoseWithCovarianceStamped>(
@@ -866,6 +884,18 @@ void Node::HandleLocalizationScoreMessage(int trajectory_id, const std::string& 
   }
   map_builder_bridge_->sensor_bridge(trajectory_id)
       ->HandleLocalizationScoreMessage(sensor_id, msg);
+  auto now = rclcpp::Clock();
+  // RCLCPP_INFO_STREAM_THROTTLE(node_->get_logger(), now, 1000, "---------in localization---------");
+}
+
+void Node::HandleOptimizationSighMessage(int trajectory_id, const std::string& sensor_id,
+                              const std_msgs::msg::Bool::ConstSharedPtr& msg){
+  absl::MutexLock lock(&mutex_);
+  if (!sensor_samplers_.at(trajectory_id).rangefinder_sampler.Pulse()) {
+    return;
+  }
+  map_builder_bridge_->sensor_bridge(trajectory_id)
+      ->HandleOptimizationSighMessage(sensor_id, msg);
   auto now = rclcpp::Clock();
   // RCLCPP_INFO_STREAM_THROTTLE(node_->get_logger(), now, 1000, "---------in localization---------");
 }

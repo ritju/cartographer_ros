@@ -54,6 +54,7 @@
 #include <tf2_ros/transform_listener.h>
 #include <std_msgs/msg/float32.hpp>
 #include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
+#include "std_msgs/msg/bool.hpp"
 
 namespace cartographer_ros {
 
@@ -112,6 +113,8 @@ class Node {
   
   void HandleLocalizationScoreMessage(int trajectory_id, const std::string& sensor_id,
                               const std_msgs::msg::Float32::ConstSharedPtr& msg);
+  void HandleOptimizationSighMessage(int trajectory_id, const std::string& sensor_id,
+                              const std_msgs::msg::Bool::ConstSharedPtr& msg);
   void HandleTransformMessage(int trajectory_id, const std::string& sensor_id,
                               const geometry_msgs::msg::PoseWithCovarianceStamped::ConstSharedPtr& msg);
   void HandleMultiEchoLaserScanMessage(

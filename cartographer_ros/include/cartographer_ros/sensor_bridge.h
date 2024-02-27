@@ -37,6 +37,7 @@
 #include <sensor_msgs/msg/nav_sat_fix.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <std_msgs/msg/float32.hpp>
+#include <std_msgs/msg/bool.hpp>
 #include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
 
 namespace cartographer_ros {
@@ -69,6 +70,7 @@ class SensorBridge {
   void HandleLaserScanMessage(const std::string& sensor_id,
                               const sensor_msgs::msg::LaserScan::ConstSharedPtr& msg);
   void HandleLocalizationScoreMessage(const std::string& sensor_id, const std_msgs::msg::Float32::ConstSharedPtr& msg);
+  void HandleOptimizationSighMessage(const std::string& sensor_id, const std_msgs::msg::Bool::ConstSharedPtr& msg);
   void HandleTransformMessage(const std::string& sensor_id, const geometry_msgs::msg::PoseWithCovarianceStamped::ConstSharedPtr& msg);
   void HandleMultiEchoLaserScanMessage(
       const std::string& sensor_id,
@@ -97,6 +99,7 @@ class SensorBridge {
 
   absl::optional<::cartographer::transform::Rigid3d> ecef_to_local_frame_;
   float localization_score_;
+  bool pause_optimization_sign_;
   float global_pose_x_, global_pose_y_;
 };
 
