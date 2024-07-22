@@ -72,7 +72,7 @@ template <typename MessageType>
 }
 
 template <typename MessageType>
-::rclcpp::SubscriptionBase::SharedPtr SubscribeWithHandlerForOptimizationSign(
+::rclcpp::SubscriptionBase::SharedPtr SubscribeWithHandlerForOptimizeSubmapPose(
     void (Node::*handler)(int, const std::string&,
                           const typename MessageType::ConstSharedPtr&),
     const int trajectory_id, const std::string& topic,
@@ -467,9 +467,9 @@ void Node::LaunchSubscribers(const TrajectoryOptions& options,
         kLocalizationScoreTopic});
   
   subscribers_[trajectory_id].push_back(
-      {SubscribeWithHandlerForOptimizationSign<std_msgs::msg::Bool>(
-            &Node::HandleOptimizationSighMessage, trajectory_id, kOptimizationSignTopic, node_, this),
-        kOptimizationSignTopic});
+      {SubscribeWithHandler<cartographer_ros_msgs::msg::SubmapEntry>(
+            &Node::HandleOptimizeSubmapPoseMessage, trajectory_id, kOptimizeSubmapPoseTopic, node_, this),
+        kOptimizeSubmapPoseTopic});
   
   subscribers_[trajectory_id].push_back(
       {SubscribeWithHandler<geometry_msgs::msg::PoseWithCovarianceStamped>(
@@ -888,14 +888,14 @@ void Node::HandleLocalizationScoreMessage(int trajectory_id, const std::string& 
   // RCLCPP_INFO_STREAM_THROTTLE(node_->get_logger(), now, 1000, "---------in localization---------");
 }
 
-void Node::HandleOptimizationSighMessage(int trajectory_id, const std::string& sensor_id,
-                              const std_msgs::msg::Bool::ConstSharedPtr& msg){
+void Node::HandleOptimizeSubmapPoseMessage(int trajectory_id, const std::string& sensor_id,
+                              const cartographer_ros_msgs::msg::SubmapEntry::ConstSharedPtr& msg){
   absl::MutexLock lock(&mutex_);
   if (!sensor_samplers_.at(trajectory_id).rangefinder_sampler.Pulse()) {
     return;
   }
   map_builder_bridge_->sensor_bridge(trajectory_id)
-      ->HandleOptimizationSighMessage(sensor_id, msg);
+      ->HandleOptimizeSubmapPoseMessage(sensor_id, msg);
   auto now = rclcpp::Clock();
   // RCLCPP_INFO_STREAM_THROTTLE(node_->get_logger(), now, 1000, "---------in localization---------");
 }

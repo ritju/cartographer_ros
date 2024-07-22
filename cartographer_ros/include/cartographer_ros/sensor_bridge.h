@@ -27,6 +27,7 @@
 #include "cartographer/transform/transform.h"
 #include "cartographer_ros/tf_bridge.h"
 #include "cartographer_ros_msgs/msg/landmark_list.hpp"
+#include "cartographer_ros_msgs/msg/submap_entry.hpp"
 #include <geometry_msgs/msg/transform.hpp>
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <nav_msgs/msg/occupancy_grid.hpp>
@@ -70,7 +71,7 @@ class SensorBridge {
   void HandleLaserScanMessage(const std::string& sensor_id,
                               const sensor_msgs::msg::LaserScan::ConstSharedPtr& msg);
   void HandleLocalizationScoreMessage(const std::string& sensor_id, const std_msgs::msg::Float32::ConstSharedPtr& msg);
-  void HandleOptimizationSighMessage(const std::string& sensor_id, const std_msgs::msg::Bool::ConstSharedPtr& msg);
+  void HandleOptimizeSubmapPoseMessage(const std::string& sensor_id, const cartographer_ros_msgs::msg::SubmapEntry::ConstSharedPtr& msg);
   void HandleTransformMessage(const std::string& sensor_id, const geometry_msgs::msg::PoseWithCovarianceStamped::ConstSharedPtr& msg);
   void HandleMultiEchoLaserScanMessage(
       const std::string& sensor_id,
@@ -99,7 +100,7 @@ class SensorBridge {
 
   absl::optional<::cartographer::transform::Rigid3d> ecef_to_local_frame_;
   float localization_score_;
-  bool pause_optimization_sign_;
+  std::vector<float> corrected_submap_pose_;
   float global_pose_x_, global_pose_y_;
 };
 

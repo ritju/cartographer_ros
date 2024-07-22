@@ -46,7 +46,7 @@ SensorBridge::SensorBridge(
     carto::mapping::TrajectoryBuilderInterface* const trajectory_builder)
     : num_subdivisions_per_laser_scan_(num_subdivisions_per_laser_scan),
       tf_bridge_(tracking_frame, lookup_transform_timeout_sec, tf_buffer),
-      trajectory_builder_(trajectory_builder), pause_optimization_sign_(false) {}
+      trajectory_builder_(trajectory_builder),corrected_submap_pose_(10) {}
 
 std::unique_ptr<carto::sensor::OdometryData> SensorBridge::ToOdometryData(
     const nav_msgs::msg::Odometry::ConstSharedPtr& msg) {
@@ -164,8 +164,18 @@ void SensorBridge::HandleLaserScanMessage(
 void SensorBridge::HandleLocalizationScoreMessage(const std::string& sensor_id, const std_msgs::msg::Float32::ConstSharedPtr& msg){
   localization_score_ = msg->data;
 }
-void SensorBridge::HandleOptimizationSighMessage(const std::string& sensor_id, const std_msgs::msg::Bool::ConstSharedPtr& msg){
-  pause_optimization_sign_ = msg->data;
+void SensorBridge::HandleOptimizeSubmapPoseMessage(const std::string& sensor_id, const cartographer_ros_msgs::msg::SubmapEntry::ConstSharedPtr& msg){
+  corrected_submap_pose_.clear();
+  corrected_submap_pose_.emplace_back(msg->trajectory_id);
+  corrected_submap_pose_.emplace_back(msg->submap_index);
+  corrected_submap_pose_.emplace_back(msg->submap_version);
+  corrected_submap_pose_.emplace_back(msg->pose.position.x);
+  corrected_submap_pose_.emplace_back(msg->pose.position.y);
+  corrected_submap_pose_.emplace_back(msg->pose.position.z);
+  corrected_submap_pose_.emplace_back(msg->pose.orientation.x);
+  corrected_submap_pose_.emplace_back(msg->pose.orientation.y);
+  corrected_submap_pose_.emplace_back(msg->pose.orientation.z);
+  corrected_submap_pose_.emplace_back(msg->pose.orientation.w);
 }
 
 void SensorBridge::HandleTransformMessage(const std::string& sensor_id, const geometry_msgs::msg::PoseWithCovarianceStamped::ConstSharedPtr& msg){
@@ -248,7 +258,7 @@ void SensorBridge::HandleRangefinder(
   const auto sensor_to_tracking =
       tf_bridge_.LookupToTracking(time, CheckNoLeadingSlash(frame_id));
   if (sensor_to_tracking != nullptr) {
-    trajectory_builder_->SetLocalizationScore(localization_score_, pause_optimization_sign_, global_pose_x_, global_pose_y_);
+    trajectory_builder_->SetLocalizationScore(localization_score_, corrected_submap_pose_, global_pose_x_, global_pose_y_);
     trajectory_builder_->AddSensorData(
         sensor_id, carto::sensor::TimedPointCloudData{
                        time, sensor_to_tracking->translation().cast<float>(),

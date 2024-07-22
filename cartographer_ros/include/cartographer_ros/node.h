@@ -113,8 +113,8 @@ class Node {
   
   void HandleLocalizationScoreMessage(int trajectory_id, const std::string& sensor_id,
                               const std_msgs::msg::Float32::ConstSharedPtr& msg);
-  void HandleOptimizationSighMessage(int trajectory_id, const std::string& sensor_id,
-                              const std_msgs::msg::Bool::ConstSharedPtr& msg);
+  void HandleOptimizeSubmapPoseMessage(int trajectory_id, const std::string& sensor_id,
+                              const cartographer_ros_msgs::msg::SubmapEntry::ConstSharedPtr& msg);
   void HandleTransformMessage(int trajectory_id, const std::string& sensor_id,
                               const geometry_msgs::msg::PoseWithCovarianceStamped::ConstSharedPtr& msg);
   void HandleMultiEchoLaserScanMessage(
